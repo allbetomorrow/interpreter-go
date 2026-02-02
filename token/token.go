@@ -45,6 +45,7 @@ const (
 	KW_SPACE   = "SPACE"
 	KW_TAB     = "TAB"
 	KW_MOD     = "MOD"
+	KW_OF      = "of"
 )
 
 var keywords = map[string]TokenType{
@@ -63,6 +64,7 @@ var keywords = map[string]TokenType{
 	"tab":     KW_TAB,
 	"space":   KW_SPACE,
 	"mod":     KW_MOD,
+	"of":      KW_OF,
 }
 
 func LookUpIdent(ident string) TokenType {

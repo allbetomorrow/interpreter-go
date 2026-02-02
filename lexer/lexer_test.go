@@ -25,7 +25,7 @@ func TestNextToken(t *testing.T) {
 	done:
 	read skip space tab;
 	>,=<><=>=<*/
-	1343456B, 1343456b, 1343456C, 1343456c, 1343456D, 1343456H, 5ABH`
+	1343456B, 1343456b, 1343456C, 1343456c, 1343456D, 1343456H, 5ABH of`
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -101,6 +101,7 @@ func TestNextToken(t *testing.T) {
 		{token.LEX_INT, "1343456H"},
 		{token.LEX_COMMA, ","},
 		{token.LEX_INT, "5ABH"},
+		{token.KW_OF, "of"},
 		{token.LEX_EOF, ""},
 	}
 
