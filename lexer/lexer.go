@@ -33,21 +33,16 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.ch {
 	case '>':
 		if l.peekChar() == '=' {
-			ch := l.ch
-			l.readChar()
-			tok = token.Token{Type: token.LEX_GE, Literal: string(ch) + string(l.ch)}
+			tok = l.newCompaundToken(token.LEX_GE, l.ch)
 		} else {
 			tok = newToken(token.LEX_GT, l.ch)
 		}
 	case '<':
 		if l.peekChar() == '=' {
-			ch := l.ch
-			l.readChar()
-			tok = token.Token{Type: token.LEX_LE, Literal: string(ch) + string(l.ch)}
+			tok = l.newCompaundToken(token.LEX_LE, l.ch)
 		} else if l.peekChar() == '>' {
-			ch := l.ch
-			l.readChar()
-			tok = token.Token{Type: token.LEX_NE, Literal: string(ch) + string(l.ch)}
+
+			tok = l.newCompaundToken(token.LEX_NE, l.ch)
 		} else {
 			tok = newToken(token.LEX_LT, l.ch)
 		}
@@ -71,9 +66,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LEX_EQ, l.ch)
 	case ':':
 		if l.peekChar() == '=' {
-			ch := l.ch
-			l.readChar()
-			tok = token.Token{Type: token.LEX_ASSIGN, Literal: string(ch) + string(l.ch)}
+			tok = l.newCompaundToken(token.LEX_ASSIGN, l.ch)
 		} else {
 			tok = newToken(token.LEX_COLON, l.ch)
 		}
@@ -142,4 +135,9 @@ func (l *Lexer) peekChar() byte {
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+func (l *Lexer) newCompaundToken(tokenType token.TokenType, ch byte) token.Token {
+	l.readChar()
+	return token.Token{Type: tokenType, Literal: string(ch) + string(l.ch)}
 }
