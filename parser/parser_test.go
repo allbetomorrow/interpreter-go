@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDeclStatment(t *testing.T) {
+func TestDeclStatments(t *testing.T) {
 	input := `x: integer;
 	foll: integer;`
 
