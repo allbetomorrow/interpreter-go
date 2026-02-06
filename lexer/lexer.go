@@ -31,6 +31,10 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.ch {
+	case '[':
+		tok = newToken(token.LEX_LBRACKET, l.ch)
+	case ']':
+		tok = newToken(token.LEX_RBRACKET, l.ch)
 	case '>':
 		if l.peekChar() == '=' {
 			tok = l.newCompaundToken(token.LEX_GE, l.ch)

@@ -25,7 +25,8 @@ func TestNextToken(t *testing.T) {
 	done:
 	read skip space tab;
 	>,=<><=>=<*/
-	1343456B, 1343456b, 1343456C, 1343456c, 1343456D, 1343456H, 5ABH of`
+	1343456B, 1343456b, 1343456C, 1343456c, 1343456D, 1343456H, 5ABH of
+	arr: vector[10] of integer;`
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -102,9 +103,18 @@ func TestNextToken(t *testing.T) {
 		{token.LEX_COMMA, ","},
 		{token.LEX_INT, "5ABH"},
 		{token.KW_OF, "of"},
+		{token.LEX_IDENT, "arr"},
+		{token.LEX_COLON, ":"},
+		{token.KW_VECTOR, "vector"},
+		{token.LEX_LBRACKET, "["},
+		{token.LEX_INT, "10"},
+		{token.LEX_RBRACKET, "]"},
+		{token.KW_OF, "of"},
+		{token.KW_INTEGER, "integer"},
+		{token.LEX_SEMICOLON, ";"},
 		{token.LEX_EOF, ""},
 	}
-
+	//arr: vector[10] of integer;
 	l := New(input)
 
 	for i, tt := range tests {

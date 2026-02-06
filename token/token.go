@@ -26,8 +26,10 @@ const (
 	LEX_SEMICOLON = ";"
 	LEX_COLON     = ":"
 
-	LEX_LPAREN = "("
-	LEX_RPAREN = ")"
+	LEX_LPAREN   = "("
+	LEX_RPAREN   = ")"
+	LEX_LBRACKET = "["
+	LEX_RBRACKET = "]"
 
 	// Keywords
 	KW_GOTO    = "GOTO"
@@ -45,7 +47,8 @@ const (
 	KW_SPACE   = "SPACE"
 	KW_TAB     = "TAB"
 	KW_MOD     = "MOD"
-	KW_OF      = "of"
+	KW_OF      = "OF"
+	KW_VECTOR  = "VECTOR"
 )
 
 var keywords = map[string]TokenType{
@@ -65,6 +68,7 @@ var keywords = map[string]TokenType{
 	"space":   KW_SPACE,
 	"mod":     KW_MOD,
 	"of":      KW_OF,
+	"vector":  KW_VECTOR,
 }
 
 func LookUpIdent(ident string) TokenType {

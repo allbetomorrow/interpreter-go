@@ -28,5 +28,16 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
-	return nil
+	program := &ast.Program{}
+	program.Statement = []ast.Statement{}
+
+	for p.curToken.Type != token.LEX_EOF {
+		stmt := p.parseStatment()
+		if stmt != nil {
+			program.Statement = append(program.Statement, stmt)
+
+		}
+		p.nextToken()
+	}
+	return program
 }
