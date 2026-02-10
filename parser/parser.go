@@ -32,7 +32,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	program.Statement = []ast.Statement{}
 
 	for p.curToken.Type != token.LEX_EOF {
-		stmt := p.parseStatment()
+		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statement = append(program.Statement, stmt)
 
@@ -40,4 +40,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 		p.nextToken()
 	}
 	return program
+}
+
+func (p *Parser) parseStatement() ast.Statement {
+	switch p.curToken.Type {
+
+	}
 }

@@ -114,7 +114,7 @@ func TestNextToken(t *testing.T) {
 		{token.LEX_SEMICOLON, ";"},
 		{token.LEX_EOF, ""},
 	}
-	//arr: vector[10] of integer;
+
 	l := New(input)
 
 	for i, tt := range tests {
