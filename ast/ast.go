@@ -41,6 +41,22 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+type MarkerStatement struct {
+	Token  token.Token // the token.LEX_COLON token
+	Marker *Identifier
+}
+
+func (ms *MarkerStatement) statementNode()       {}
+func (ms *MarkerStatement) TokenLiteral() string { return ms.Token.Literal }
+func (ms *MarkerStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ms.Marker.String())
+	out.WriteString(ms.TokenLiteral())
+
+	return out.String()
+}
+
 type DeclStatment struct {
 	Token token.Token // the token.LEX_COLON token
 	Name  *Identifier

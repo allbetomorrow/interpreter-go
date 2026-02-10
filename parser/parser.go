@@ -69,6 +69,10 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 	}
 }
 
+func (p *Parser) peekTokenIsType() bool {
+	return p.peekToken.Type == token.KW_INTEGER || p.peekToken.Type == token.KW_REAL
+}
+
 func (p *Parser) Errors() []string {
 	return p.errors
 }
@@ -83,7 +87,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 
-	for p.curToken.Type != token.LEX_EOF {
+	for !p.curTokenIs(token.LEX_EOF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
@@ -91,12 +95,51 @@ func (p *Parser) ParseProgram() *ast.Program {
 		}
 		p.nextToken()
 	}
+
 	return program
 }
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
+	case token.LEX_IDENT:
+		curTok := p.curToken
 
+		if !p.expectPeek(token.LEX_COLON) {
+			return nil
+		}
+
+		if p.peekTokenIsType() {
+			return p.parseDeclStatement(curTok)
+		} else {
+			return p.parseMarkerStatement(curTok)
+		}
 	}
+	return nil
+}
+
+func (p *Parser) parseDeclStatement(t token.Token) *ast.DeclStatment {
+	stmt := &ast.DeclStatment{
+		Token: p.curToken,
+		Name: &ast.Identifier{
+			Token: t,
+			Value: t.Literal,
+		},
+	}
+
+	p.nextToken()
+
+	stmt.Type = &ast.Type{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
+
+	if p.peekTokenIs(token.LEX_SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseMarkerStatement(t token.Token) *ast.MarkerStatement {
 	return nil
 }
