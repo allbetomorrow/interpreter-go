@@ -18,8 +18,8 @@ func TestDeclStatments(t *testing.T) {
 		t.Fatalf("ParserProgram() returned nil")
 	}
 
-	if len(program.Statement) != 2 {
-		t.Fatalf("program.Statments does not contain 2 statments. got=%d", len(program.Statement))
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statments does not contain 2 statments. got=%d", len(program.Statements))
 	}
 
 	tests := []struct {
@@ -30,7 +30,7 @@ func TestDeclStatments(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		stmt := program.Statement[i]
+		stmt := program.Statements[i]
 		if !testDeclStatment(t, stmt, tt.expectedIdentifier) {
 			return
 		}
