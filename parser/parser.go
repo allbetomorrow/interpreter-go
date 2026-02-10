@@ -102,6 +102,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LEX_IDENT:
+		if p.peekTokenIs(token.LEX_ASSIGN) {
+			return p.parseAssignStatement()
+		}
+
 		curTok := p.curToken
 
 		if !p.expectPeek(token.LEX_COLON) {
@@ -140,6 +144,27 @@ func (p *Parser) parseDeclStatement(t token.Token) *ast.DeclStatment {
 	return stmt
 }
 
+func (p *Parser) parseAssignStatement() *ast.AssignStatement {
+	name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	p.nextToken()
+
+	stmt := &ast.AssignStatement{Token: p.curToken, Name: name}
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.LEX_SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
 func (p *Parser) parseMarkerStatement(t token.Token) *ast.MarkerStatement {
+	return nil
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return nil
 }
