@@ -18,6 +18,17 @@ const (
 	CALL        // myFunction(X)
 )
 
+var precedences = map[token.TokenType]int{
+	token.LEX_EQ:   EQUALS,
+	token.LEX_NE:   EQUALS,
+	token.LEX_LT:   LESSGREATER,
+	token.LEX_GT:   LESSGREATER,
+	token.LEX_PLUS: SUM,
+	token.LEX_MIN:  SUM,
+	token.LEX_MULT: PRODUCT,
+	token.LEX_DIV:  PRODUCT,
+}
+
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
@@ -80,6 +91,11 @@ func (p *Parser) Errors() []string {
 func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
 		t, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) noPrefixParseFnError(t token.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t)
 	p.errors = append(p.errors, msg)
 }
 
@@ -166,5 +182,31 @@ func (p *Parser) parseMarkerStatement(t token.Token) *ast.MarkerStatement {
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	return nil
+	prefix := p.prefixParseFns[p.curToken.Type]
+
+	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
+		return nil
+	}
+
+	leftExp := prefix()
+	for !p.peekTokenIs(token.LEX_SEMICOLON) && precedence < p.peekPrecedence() {
+		infix := p.infixParseFns[p.peekToken.Type]
+		if infix == nil {
+			return leftExp
+		}
+
+		p.nextToken()
+		leftExp = infix(leftExp)
+	}
+
+	return leftExp
+}
+
+func (p *Parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
 }
