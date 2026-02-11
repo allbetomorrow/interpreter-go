@@ -28,7 +28,17 @@ func TestDeclStatments(t *testing.T) {
 		}
 
 		stmt := program.Statements[0]
-		if !testDeclStatment(t, stmt, tt.expectedIdentifier) {
+
+		if stmt.TokenLiteral() != ":" {
+			t.Errorf("s.TokenLiteral() is not \":\". got=%q.", stmt.TokenLiteral())
+		}
+
+		declStmt, ok := stmt.(*ast.DeclStatment)
+		if !ok {
+			t.Errorf("s not *ast.DeclStatment. got=%T", stmt)
+		}
+
+		if !testIdentifier(t, *declStmt.Name, tt.expectedIdentifier) {
 			return
 		}
 
@@ -39,25 +49,15 @@ func TestDeclStatments(t *testing.T) {
 	}
 }
 
-func testDeclStatment(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != ":" {
-		t.Errorf("s.TokenLiteral() is not \":\". got=%q.", s.TokenLiteral())
+func testIdentifier(t *testing.T, s ast.Identifier, name string) bool {
+
+	if s.Value != name {
+		t.Errorf("declStmt.Name.Value not '%s'. got=%s", name, s.Value)
 		return false
 	}
 
-	declStmt, ok := s.(*ast.DeclStatment)
-	if !ok {
-		t.Errorf("s not *ast.DeclStatment. got=%T", s)
-		return false
-	}
-
-	if declStmt.Name.Value != name {
-		t.Errorf("declStmt.Name.Value not '%s'. got=%s", name, declStmt.Name.Value)
-		return false
-	}
-
-	if declStmt.Name.TokenLiteral() != name {
-		t.Errorf("s.Name not '%s'. got=%s", name, declStmt.Name)
+	if s.TokenLiteral() != name {
+		t.Errorf("s.Name not '%s'. got=%s", name, s.TokenLiteral())
 		return false
 	}
 
