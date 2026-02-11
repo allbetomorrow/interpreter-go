@@ -51,6 +51,8 @@ func New(l *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.LEX_INT, p.parseIntegerLiteral)
 	p.nextToken()
 	p.nextToken()
 
@@ -209,4 +211,12 @@ func (p *Parser) peekPrecedence() int {
 	}
 
 	return LOWEST
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	return nil
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
 }
