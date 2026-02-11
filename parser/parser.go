@@ -5,6 +5,7 @@ import (
 	"interp/ast"
 	"interp/lexer"
 	"interp/token"
+	"strconv"
 )
 
 const (
@@ -52,7 +53,9 @@ func New(l *lexer.Lexer) *Parser {
 	}
 
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.LEX_IDENT, p.parseIdentifier)
 	p.registerPrefix(token.LEX_INT, p.parseIntegerLiteral)
+
 	p.nextToken()
 	p.nextToken()
 
@@ -213,8 +216,23 @@ func (p *Parser) peekPrecedence() int {
 	return LOWEST
 }
 
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	return nil
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	lit.Value = value
+	return lit
 }
 
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
