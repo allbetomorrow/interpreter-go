@@ -55,6 +55,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.LEX_IDENT, p.parseIdentifier)
 	p.registerPrefix(token.LEX_INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.LEX_MIN, p.parsePrefixExpression)
+	p.registerPrefix(token.LEX_LPAREN, p.parseGroupedExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -138,8 +140,20 @@ func (p *Parser) parseStatement() ast.Statement {
 		} else {
 			return p.parseMarkerStatement(curTok)
 		}
+	default:
+		return p.parseExpressionStatement()
 	}
-	return nil
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.curToken}
+
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.LEX_SEMICOLON) {
+		p.nextToken()
+	}
+	return stmt
 }
 
 func (p *Parser) parseDeclStatement(t token.Token) *ast.DeclStatment {
@@ -237,4 +251,29 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+
+	p.nextToken()
+
+	expression.Right = p.parseExpression(PREFIX)
+
+	return expression
+}
+
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.LEX_RPAREN) {
+		return nil
+	}
+
+	return exp
 }
