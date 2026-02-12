@@ -58,6 +58,18 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LEX_MIN, p.parsePrefixExpression)
 	p.registerPrefix(token.LEX_LPAREN, p.parseGroupedExpression)
 
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.LEX_PLUS, p.parseInfixExpression)
+	p.registerInfix(token.LEX_MIN, p.parseInfixExpression)
+	p.registerInfix(token.LEX_MULT, p.parseInfixExpression)
+	p.registerInfix(token.LEX_DIV, p.parseInfixExpression)
+	p.registerInfix(token.LEX_GT, p.parseInfixExpression)
+	p.registerInfix(token.LEX_LT, p.parseInfixExpression)
+	p.registerInfix(token.LEX_EQ, p.parseInfixExpression)
+	p.registerInfix(token.LEX_NE, p.parseInfixExpression)
+	p.registerInfix(token.LEX_LE, p.parseInfixExpression)
+	p.registerInfix(token.LEX_GE, p.parseInfixExpression)
+
 	p.nextToken()
 	p.nextToken()
 
@@ -122,6 +134,28 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return program
 }
 
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	expression := &ast.InfixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+		Left:     left,
+	}
+
+	precedence := p.curPrecedence()
+	p.nextToken()
+	expression.Right = p.parseExpression(precedence)
+
+	return expression
+}
+
+func (p *Parser) curPrecedence() int {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
+}
+
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LEX_IDENT:
@@ -129,12 +163,12 @@ func (p *Parser) parseStatement() ast.Statement {
 			return p.parseAssignStatement()
 		}
 
-		curTok := p.curToken
-
-		if !p.expectPeek(token.LEX_COLON) {
-			return nil
+		if !p.peekTokenIs(token.LEX_COLON) {
+			return p.parseExpressionStatement()
 		}
 
+		curTok := p.curToken
+		p.nextToken()
 		if p.peekTokenIsType() {
 			return p.parseDeclStatement(curTok)
 		} else {
@@ -253,12 +287,15 @@ func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }
 
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}
+
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
 	}
-
 	p.nextToken()
 
 	expression.Right = p.parseExpression(PREFIX)
