@@ -57,6 +57,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LEX_INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.LEX_MIN, p.parsePrefixExpression)
 	p.registerPrefix(token.LEX_LPAREN, p.parseGroupedExpression)
+	p.registerPrefix(token.KW_IF, p.parseIfExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.LEX_PLUS, p.parseInfixExpression)
@@ -132,6 +133,51 @@ func (p *Parser) ParseProgram() *ast.Program {
 	}
 
 	return program
+}
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	expression := &ast.IfExpression{Token: p.curToken}
+
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.KW_THEN) {
+		return nil
+	}
+
+	p.nextToken()
+	expression.Consequence = p.parseBlockStatement()
+
+	if p.peekTokenIs(token.KW_ELSE) {
+		p.nextToken()
+		expression.Alternative = p.parseBlockStatement()
+	}
+
+	if !p.curTokenIs(token.KW_END) {
+		return nil
+	}
+
+	return expression
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{
+		Token: token.Token{
+			Type:    "",
+			Literal: "",
+		},
+	}
+	block.Statements = []ast.Statement{}
+
+	for !p.curTokenIs(token.KW_ELSE) && !p.curTokenIs(token.KW_END) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+		p.nextToken()
+	}
+
+	return block
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
