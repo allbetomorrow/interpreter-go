@@ -148,7 +148,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	p.nextToken()
 	expression.Consequence = p.parseBlockStatement()
 
-	if p.peekTokenIs(token.KW_ELSE) {
+	if p.curTokenIs(token.KW_ELSE) {
 		p.nextToken()
 		expression.Alternative = p.parseBlockStatement()
 	}
