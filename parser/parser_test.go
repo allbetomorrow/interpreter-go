@@ -558,32 +558,39 @@ func TestGoto(t *testing.T) {
 	}
 }
 
-// func TestParsion(t *testing.T) {
-// 	input := `begin
-//   x: integer;
-//   count: integer;
+func TestLoop(t *testing.T) {
+	input := `loop begin
+							count := 2
+						end;`
 
-//   begin
-//     count := 10;
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
 
-//     if count > 0 then
-//       count := count - 1;
-//     else
-//       goto done;
-//     end;
-//   end;
-// end;`
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
 
-// 	l := lexer.New(input)
-// 	p := New(l)
-// 	program := p.ParseProgram()
-// 	checkParserErrors(t, p)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
 
-// 	if len(program.Statements) != 1 {
-// 		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
-// 			1, len(program.Statements))
-// 	}
-// }
+	loop, ok := (stmt.Expression).(*ast.LoopExpression)
+	if !ok {
+		t.Fatalf("program.Statements[0].Expression is not ast.LoopExpression. got=%T",
+			stmt.Expression)
+	}
+
+	beg, ok := loop.Body.(*ast.BeginExpression)
+	if len(beg.Block.Statements) != 1 {
+		t.Fatalf("BeginExpression.Block.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+}
 
 func testInfixExpression(t *testing.T, exp ast.Expression, left interface{},
 	operator string, right interface{}) bool {

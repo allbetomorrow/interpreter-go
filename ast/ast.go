@@ -227,6 +227,23 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
+type LoopExpression struct {
+	Token token.Token
+	Body  Expression
+}
+
+func (ls *LoopExpression) expressionNode()      {}
+func (ls *LoopExpression) TokenLiteral() string { return ls.Token.Literal }
+func (ls *LoopExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ls.Token.Literal)
+	out.WriteString(" ")
+	out.WriteString(ls.Body.String())
+
+	return out.String()
+}
+
 type BlockStatement struct {
 	Token      token.Token // the { token
 	Statements []Statement

@@ -59,6 +59,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LEX_LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.KW_IF, p.parseIfExpression)
 	p.registerPrefix(token.KW_BEGIN, p.parseBeginExpression)
+	p.registerPrefix(token.KW_LOOP, p.parseLoopExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.LEX_PLUS, p.parseInfixExpression)
@@ -160,6 +161,16 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	return expression
+}
+
+func (p *Parser) parseLoopExpression() ast.Expression {
+	expresison := &ast.LoopExpression{Token: p.curToken}
+
+	p.nextToken()
+
+	expresison.Body = p.parseExpression(LOWEST)
+
+	return expresison
 }
 
 func (p *Parser) parseBeginExpression() ast.Expression {
