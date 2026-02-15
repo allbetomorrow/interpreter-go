@@ -185,6 +185,23 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
+type BeginExpression struct {
+	Token token.Token // begin
+	Block *BlockStatement
+}
+
+func (be *BeginExpression) expressionNode()      {}
+func (be *BeginExpression) TokenLiteral() string { return be.Token.Literal }
+func (be *BeginExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("begin")
+	out.WriteString(be.Block.String())
+	out.WriteString("end")
+
+	return out.String()
+}
+
 type IfExpression struct {
 	Token       token.Token // The 'if' token
 	Condition   Expression

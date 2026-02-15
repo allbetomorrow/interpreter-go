@@ -486,6 +486,54 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
+func TestBeginExpression(t *testing.T) {
+	input := `begin 
+							x := y;
+						end`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.BeginExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.BeginExpression. got=%T", stmt.Expression)
+	}
+
+	if len(exp.Block.Statements) != 1 {
+		t.Errorf("block is not 1 statements. got=%d\n",
+			len(exp.Block.Statements))
+	}
+
+	asignStmt, ok := exp.Block.Statements[0].(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.AssignStatement. got=%T",
+			exp.Block.Statements[0])
+	}
+
+	if !testIdentifier(t, asignStmt.Name, "x") {
+		return
+	}
+
+	alt_val := asignStmt.Value
+	if !testLiteralExpression(t, alt_val, "y") {
+		return
+	}
+
+}
+
 func testInfixExpression(t *testing.T, exp ast.Expression, left interface{},
 	operator string, right interface{}) bool {
 
