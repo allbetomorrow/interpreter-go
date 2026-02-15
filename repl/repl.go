@@ -4,37 +4,47 @@ import (
 	"bufio"
 	"fmt"
 	"interp/lexer"
-	"interp/token"
+	"interp/parser"
 	"io"
 	"log"
 	"os"
 )
 
-const PROMPT = ">>"
-
 func Start(in io.Reader, out io.Writer) {
-	file, err := os.OpenFile("output.txt", os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("output.txt", os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(in)
 	for {
-		fmt.Printf(PROMPT)
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
 
 		line := scanner.Text()
-
+		fmt.Println(line)
 		l := lexer.New(line)
+		p := parser.New(l)
 
-		for tok := l.NextToken(); tok.Type != token.LEX_EOF; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
-			s := fmt.Sprintf("{Type: %s, Literal: %s}\n", tok.Type, tok.Literal)
-			file.WriteString(s)
+		program := p.ParseProgram()
+
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
+			continue
 		}
-		fmt.Printf("\n")
+
+		file.WriteString(program.String())
+		file.WriteString("\n")
+
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	io.WriteString(out, "Woops!\n")
+	io.WriteString(out, " parser errors:\n")
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }

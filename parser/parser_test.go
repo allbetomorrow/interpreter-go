@@ -534,6 +534,57 @@ func TestBeginExpression(t *testing.T) {
 
 }
 
+func TestGoto(t *testing.T) {
+	input := `goto self`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.GotoStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.GotoStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if !testIdentifier(t, stmt.Name, "self") {
+		return
+	}
+}
+
+// func TestParsion(t *testing.T) {
+// 	input := `begin
+//   x: integer;
+//   count: integer;
+
+//   begin
+//     count := 10;
+
+//     if count > 0 then
+//       count := count - 1;
+//     else
+//       goto done;
+//     end;
+//   end;
+// end;`
+
+// 	l := lexer.New(input)
+// 	p := New(l)
+// 	program := p.ParseProgram()
+// 	checkParserErrors(t, p)
+
+// 	if len(program.Statements) != 1 {
+// 		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+// 			1, len(program.Statements))
+// 	}
+// }
+
 func testInfixExpression(t *testing.T, exp ast.Expression, left interface{},
 	operator string, right interface{}) bool {
 

@@ -126,6 +126,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 	for !p.curTokenIs(token.LEX_EOF) {
 		stmt := p.parseStatement()
+
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 
@@ -235,9 +236,24 @@ func (p *Parser) parseStatement() ast.Statement {
 		} else {
 			return p.parseMarkerStatement(curTok)
 		}
+	case token.KW_GOTO:
+		return p.parseGotoStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseGotoStatement() *ast.GotoStatement {
+	stmt := &ast.GotoStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	stmt.Name = &ast.Identifier{
+		Token: token.Token{Type: p.curToken.Type, Literal: p.curToken.Literal},
+		Value: p.curToken.Literal,
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {

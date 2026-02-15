@@ -82,7 +82,7 @@ func (ds *DeclStatment) String() string {
 		out.WriteString(ds.Value.String())
 	}
 
-	out.WriteString(";")
+	out.WriteString(";\n")
 	return out.String()
 }
 
@@ -100,7 +100,7 @@ func (as *AssignStatement) String() string {
 	out.WriteString(as.Name.String())
 	out.WriteString(" := ")
 	out.WriteString(as.Value.String())
-
+	out.WriteString(";\n")
 	return out.String()
 }
 
@@ -195,9 +195,9 @@ func (be *BeginExpression) TokenLiteral() string { return be.Token.Literal }
 func (be *BeginExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("begin")
+	out.WriteString("begin\n")
 	out.WriteString(be.Block.String())
-	out.WriteString("end")
+	out.WriteString("end\n")
 
 	return out.String()
 }
@@ -214,16 +214,16 @@ func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("if")
+	out.WriteString("if ")
 	out.WriteString(ie.Condition.String())
-	out.WriteString(" then ")
+	out.WriteString(" then \n")
 	out.WriteString(ie.Consequence.String())
 
 	if ie.Alternative != nil {
-		out.WriteString("else ")
+		out.WriteString("else\n")
 		out.WriteString(ie.Alternative.String())
 	}
-	out.WriteString(" end")
+	out.WriteString(" end\n")
 	return out.String()
 }
 
@@ -241,5 +241,22 @@ func (bs *BlockStatement) String() string {
 		out.WriteString(s.String())
 	}
 
+	return out.String()
+}
+
+type GotoStatement struct {
+	Token token.Token
+	Name  *Identifier
+}
+
+func (gs *GotoStatement) statementNode()       {}
+func (gs *GotoStatement) TokenLiteral() string { return gs.Token.Literal }
+func (gs *GotoStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(gs.Token.Literal)
+	out.WriteString(" ")
+	out.WriteString(gs.Name.String())
+	out.WriteString("\n")
 	return out.String()
 }
