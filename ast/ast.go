@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"interp/token"
+	"strconv"
 )
 
 type Node interface {
@@ -83,6 +84,33 @@ func (ds *DeclStatment) String() string {
 	}
 
 	out.WriteString(";\n")
+	return out.String()
+}
+
+type DeclStatmentVector struct {
+	Token token.Token // token.KW_VECTOR
+	Name  *Identifier
+	Type  *Type
+	Size  uint64
+}
+
+func (ds *DeclStatmentVector) statementNode() {}
+
+func (ds *DeclStatmentVector) TokenLiteral() string { return ds.Token.Literal }
+
+func (ds *DeclStatmentVector) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ds.Name.String())
+	out.WriteString(": ")
+	out.WriteString(ds.TokenLiteral())
+	out.WriteString("[")
+	out.WriteString(strconv.FormatUint(uint64(ds.Size), 10))
+	out.WriteString("]")
+	out.WriteString(" of ")
+	out.WriteString(ds.Type.String())
+	out.WriteString(";\n")
+
 	return out.String()
 }
 

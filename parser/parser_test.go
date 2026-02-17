@@ -613,6 +613,44 @@ func TestLoop(t *testing.T) {
 
 }
 
+func TestVector(t *testing.T) {
+	input := `v: vector[15] of integer;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.DeclStatmentVector)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.DeclStatmentVector. got=%T",
+			program.Statements[0])
+	}
+
+	if !testIdentifier(t, stmt.Name, "v") {
+		return
+	}
+
+	if stmt.Size != 15 {
+		t.Fatalf("stmt size is not 15. got=%d",
+			stmt.Size)
+	}
+
+	if stmt.TokenLiteral() != "vector" {
+		t.Errorf("stmt.TokenLiteral() is not \"vector\". got=%q.", stmt.TokenLiteral())
+	}
+
+	if !testTypeExpression(t, stmt.Type, "integer") {
+		return
+	}
+
+}
+
 func TestParser(t *testing.T) {
 	input := `fasf:
 	count: integer;

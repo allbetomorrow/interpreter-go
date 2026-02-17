@@ -106,6 +106,10 @@ func (p *Parser) peekTokenIsType() bool {
 	return p.peekToken.Type == token.KW_INTEGER || p.peekToken.Type == token.KW_REAL
 }
 
+func (p *Parser) peekTokenIsVector() bool {
+	return p.peekToken.Type == token.KW_VECTOR
+}
+
 func (p *Parser) Errors() []string {
 	return p.errors
 }
@@ -244,6 +248,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		p.nextToken()
 		if p.peekTokenIsType() {
 			return p.parseDeclStatement(curTok)
+		} else if p.peekTokenIsVector() {
+			return p.parseVectorStatement(curTok)
 		} else {
 			return p.parseMarkerStatement(curTok)
 		}
@@ -279,6 +285,53 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	if p.peekTokenIs(token.LEX_SEMICOLON) {
 		p.nextToken()
 	}
+	return stmt
+}
+
+func (p *Parser) parseVectorStatement(t token.Token) *ast.DeclStatmentVector {
+	p.nextToken()
+	stmt := &ast.DeclStatmentVector{
+		Token: p.curToken,
+		Name: &ast.Identifier{
+			Token: t,
+			Value: t.Literal,
+		},
+	}
+
+	if !p.expectPeek(token.LEX_LBRACKET) {
+		return nil
+	}
+
+	p.nextToken()
+	value, err := strconv.ParseUint(p.curToken.Literal, 0, 64)
+
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	stmt.Size = value
+
+	if !p.expectPeek(token.LEX_RBRACKET) {
+		return nil
+	}
+
+	if !p.expectPeek(token.KW_OF) {
+		return nil
+	}
+
+	p.nextToken()
+
+	stmt.Type = &ast.Type{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
+
+	if p.peekTokenIs(token.LEX_SEMICOLON) {
+		p.nextToken()
+	}
+
 	return stmt
 }
 
