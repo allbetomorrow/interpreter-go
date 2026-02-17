@@ -264,6 +264,10 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 		Value: p.curToken.Literal,
 	}
 
+	if p.peekTokenIs(token.LEX_SEMICOLON) {
+		p.nextToken()
+	}
+
 	return stmt
 }
 
@@ -319,7 +323,10 @@ func (p *Parser) parseAssignStatement() *ast.AssignStatement {
 }
 
 func (p *Parser) parseMarkerStatement(t token.Token) *ast.MarkerStatement {
-	return nil
+	stmt := &ast.MarkerStatement{Token: p.curToken}
+	stmt.Marker = &ast.Identifier{Token: t, Value: t.Literal}
+
+	return stmt
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {

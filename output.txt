@@ -8,6 +8,10 @@ count := (count - 1);
 else
 goto done
  end
+loop begin
+goto fin
+end
+fin:
 end
 end
 

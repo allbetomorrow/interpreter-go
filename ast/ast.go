@@ -53,7 +53,7 @@ func (ms *MarkerStatement) String() string {
 
 	out.WriteString(ms.Marker.String())
 	out.WriteString(ms.TokenLiteral())
-
+	out.WriteString("\n")
 	return out.String()
 }
 

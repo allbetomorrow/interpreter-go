@@ -560,7 +560,9 @@ func TestGoto(t *testing.T) {
 
 func TestLoop(t *testing.T) {
 	input := `loop begin
-							count := 2
+							count := 2;
+							goto foo;
+							co: integer;
 						end;`
 
 	l := lexer.New(input)
@@ -586,9 +588,142 @@ func TestLoop(t *testing.T) {
 	}
 
 	beg, ok := loop.Body.(*ast.BeginExpression)
-	if len(beg.Block.Statements) != 1 {
+	if len(beg.Block.Statements) != 3 {
 		t.Fatalf("BeginExpression.Block.Statements does not contain %d statements. got=%d\n",
 			1, len(program.Statements))
+	}
+
+	_, ok = beg.Block.Statements[0].(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("ass[0] is not ast.AssignStatement. got=%T",
+			beg.Block.Statements[0])
+	}
+
+	_, ok = beg.Block.Statements[1].(*ast.GotoStatement)
+	if !ok {
+		t.Fatalf("ass[1] is not ast.GotoStatement. got=%T",
+			beg.Block.Statements[1])
+	}
+
+	_, ok = beg.Block.Statements[2].(*ast.DeclStatment)
+	if !ok {
+		t.Fatalf("ass[2] is not ast.DeclStatment. got=%T",
+			beg.Block.Statements[2])
+	}
+
+}
+
+func TestParser(t *testing.T) {
+	input := `fasf:
+	count: integer;
+	x: integer;
+	begin
+		count := 0;
+		loop if x < count then
+			x := count;
+			goto fasf;
+		else 
+			count := x;
+			goto fasf;
+		end;
+	end;
+	goto fasf;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 5 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	_, ok := program.Statements[0].(*ast.MarkerStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.MarkerStatement. got=%T",
+			program.Statements[0])
+	}
+
+	_, ok = program.Statements[1].(*ast.DeclStatment)
+	if !ok {
+		t.Fatalf("program.Statements[1] is not ast.DeclStatment. got=%T",
+			program.Statements[1])
+	}
+
+	_, ok = program.Statements[2].(*ast.DeclStatment)
+	if !ok {
+		t.Fatalf("program.Statements[2] is not ast.DeclStatment. got=%T",
+			program.Statements[2])
+	}
+
+	exp_stmt, ok := program.Statements[3].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[3] is not ast.ExpressionStatement. got=%T",
+			program.Statements[3])
+	}
+
+	_, ok = program.Statements[4].(*ast.GotoStatement)
+	if !ok {
+		t.Fatalf("program.Statements[4] is not ast.GotoStatement. got=%T",
+			program.Statements[4])
+	}
+
+	begin, ok := exp_stmt.Expression.(*ast.BeginExpression)
+	if !ok {
+		t.Fatalf("expstmt.Expression is not ast.BeginExpression. got=%T",
+			exp_stmt.Expression)
+	}
+	begin_stmts := begin.Block.Statements
+	if len(begin_stmts) != 2 {
+		t.Fatalf("begin.Block.Statements does not contain %d statements. got=%d\n",
+			1, len(begin_stmts))
+	}
+
+	_, ok = begin_stmts[0].(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("begin_stmts[0] is not ast.AssignStatement. got=%T",
+			begin_stmts[0])
+	}
+
+	exp_stmt, ok = begin_stmts[1].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("begin_stmts[0] is not ast.ExpressionStatement. got=%T",
+			begin_stmts[0])
+	}
+	loop_expr, ok := exp_stmt.Expression.(*ast.LoopExpression)
+	if !ok {
+		t.Fatalf("exp_stmt.Expression is not ast.LoopExpression. got=%T",
+			exp_stmt.Expression)
+	}
+
+	if_expr, ok := loop_expr.Body.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("loop_expr.Body is not ast.IfExpression. got=%T",
+			loop_expr.Body)
+	}
+
+	_, ok = if_expr.Consequence.Statements[0].(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("if_expr.Consequence.Statements[0] is not ast.AssignStatement. got=%T",
+			if_expr.Consequence.Statements[0])
+	}
+
+	_, ok = if_expr.Consequence.Statements[1].(*ast.GotoStatement)
+	if !ok {
+		t.Fatalf("if_expr.Consequence.Statements[1] is not ast.GotoStatement. got=%T",
+			if_expr.Consequence.Statements[1])
+	}
+
+	_, ok = if_expr.Alternative.Statements[0].(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("if_expr.Alternative.Statements[0] is not ast.AssignStatement. got=%T",
+			if_expr.Alternative.Statements[0])
+	}
+	_, ok = if_expr.Alternative.Statements[1].(*ast.GotoStatement)
+	if !ok {
+		t.Fatalf("if_expr.Alternative.Statements[1] is not ast.GotoStatement. got=%T",
+			if_expr.Alternative.Statements[1])
 	}
 }
 
