@@ -270,8 +270,8 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 		Value: p.curToken.Literal,
 	}
 
-	if p.peekTokenIs(token.LEX_SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.LEX_SEMICOLON) {
+		return nil
 	}
 
 	return stmt
@@ -282,8 +282,8 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 	stmt.Expression = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(token.LEX_SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.LEX_SEMICOLON) {
+		return nil
 	}
 	return stmt
 }
@@ -328,8 +328,8 @@ func (p *Parser) parseVectorStatement(t token.Token) *ast.DeclStatmentVector {
 		Value: p.curToken.Literal,
 	}
 
-	if p.peekTokenIs(token.LEX_SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.LEX_SEMICOLON) {
+		return nil
 	}
 
 	return stmt
@@ -351,8 +351,8 @@ func (p *Parser) parseDeclStatement(t token.Token) *ast.DeclStatment {
 		Value: p.curToken.Literal,
 	}
 
-	if p.peekTokenIs(token.LEX_SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.LEX_SEMICOLON) {
+		return nil
 	}
 
 	return stmt
@@ -368,8 +368,8 @@ func (p *Parser) parseAssignStatement() *ast.AssignStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(token.LEX_SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.LEX_SEMICOLON) {
+		return nil
 	}
 
 	return stmt

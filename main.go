@@ -3,6 +3,7 @@ package main
 import (
 	"interp/lexer"
 	"interp/parser"
+	"io"
 	"log"
 	"os"
 )
@@ -22,6 +23,13 @@ func main() {
 	l := lexer.New(string(file))
 	p := parser.New(l)
 	program := p.ParseProgram()
+
+	if len(p.Errors()) != 0 {
+		for _, msg := range p.Errors() {
+			io.WriteString(os.Stdout, "\t"+msg+"\n")
+		}
+		return
+	}
 
 	file_write.WriteString(program.String())
 	file_write.WriteString("\n")

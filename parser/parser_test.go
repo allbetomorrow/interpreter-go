@@ -656,7 +656,7 @@ func TestParser(t *testing.T) {
 	count: integer;
 	x: integer;
 	begin
-		count := 0;
+		count := 5 + 5;
 		loop if x < count then
 			x := count;
 			goto fasf;
