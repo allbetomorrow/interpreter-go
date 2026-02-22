@@ -360,7 +360,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `if x < y then x := y; end`
+	input := `if x < y then x := y; end;`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -418,7 +418,7 @@ func TestIfElseExpression(t *testing.T) {
 							x := y;
 						else 
 							y := x;
-						end`
+						end;`
 
 	l := lexer.New(input)
 	p := New(l)
