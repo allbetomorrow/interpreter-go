@@ -2,14 +2,14 @@ package object
 
 type Environment struct {
 	store map[string]Object
-	marks map[string]Object
+	Marks map[string]int
 	outer *Environment
 }
 
 func NewEnvironment() *Environment {
 	return &Environment{
 		store: make(map[string]Object),
-		marks: make(map[string]Object),
+		Marks: make(map[string]int),
 		outer: nil,
 	}
 }

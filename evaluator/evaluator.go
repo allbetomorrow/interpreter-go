@@ -65,6 +65,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+	case *ast.GotoStatement:
+		return &object.Goto{Mark: node.Token.Literal}
 	}
 	return NULL
 }
@@ -74,14 +76,34 @@ func evalBlockStatement(
 	env *object.Environment,
 ) object.Object {
 	var result object.Object = NULL
+	newEnv := object.NewEnclosedEnvironment(env)
 
-	for _, statement := range block.Statements {
-		result = Eval(statement, env)
+	for line, st := range block.Statements {
+		res, ok := st.(*ast.MarkerStatement)
+		if ok {
+			newEnv.Marks[res.Marker.Value] = line + 1
+		}
+	}
+
+	for line := 0; line < len(block.Statements); line++ {
+		if _, ok := block.Statements[line].(*ast.MarkerStatement); ok {
+			continue
+		}
+
+		result = Eval(block.Statements[line], env)
 
 		if result != nil {
 			rt := result.Type()
 			if rt == object.ERROR_OBJ {
 				return result
+			}
+
+			if rt == object.GOTO_OBJ {
+				ml, ok := newEnv.Marks[result.Inspect()]
+				if !ok {
+					return result
+				}
+				line = ml
 			}
 		}
 	}
@@ -143,18 +165,18 @@ func isTruthy(obj object.Object) bool {
 }
 
 func evalProgram(program *ast.Program, env *object.Environment) object.Object {
-	var result object.Object
 
-	for _, statement := range program.Statements {
-		result = Eval(statement, env)
+	block := &ast.BlockStatement{Statements: program.Statements}
+	// for _, statement := range program.Statements {
+	// 	result = Eval(statement, env)
 
-		switch result := result.(type) {
-		case *object.Error:
-			return result
-		}
-	}
+	// 	switch result := result.(type) {
+	// 	case *object.Error:
+	// 		return result
+	// 	}
+	// }
 
-	return result
+	return Eval(block, env)
 }
 
 func isError(obj object.Object) bool {

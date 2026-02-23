@@ -117,6 +117,70 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
+func TestGoto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]int64
+	}{
+		{
+			input: `a: integer;
+		begin
+		 a := 5;
+		 goto fs;
+		 a := 10;
+		end;
+		fs:`,
+			expected: map[string]int64{
+				"a": 5,
+			},
+		},
+		{
+			input: `a: integer;
+			begin
+				a := 3;
+				begin
+					if a = 3 then
+						a := a * 3;
+						goto ttt;
+					end;
+					a := 10; 
+				end;
+				a := 15;
+			end;
+			a := 22;
+			ttt:`,
+			expected: map[string]int64{
+				"a": 9,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		env := object.NewEnvironment()
+		Eval(program, env)
+
+		for key, val := range tt.expected {
+			env_var, ok := env.Get(key)
+			if !ok {
+				t.Fatalf("variable %s not exist", key)
+			}
+
+			integer_obj, ok := env_var.(*object.Integer)
+			if !ok {
+				t.Fatalf("env_var is not integer go %T", env_var)
+			}
+
+			if integer_obj.Value != val {
+				t.Fatalf("value of %s is not %d, got %d", key, val, integer_obj.Value)
+			}
+		}
+
+	}
+}
+
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)

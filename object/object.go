@@ -9,6 +9,7 @@ const (
 	ERROR_OBJ = "ERROR"
 
 	INTEGER_OBJ = "INTEGER"
+	GOTO_OBJ    = "GOTO"
 )
 
 type Object interface {
@@ -34,3 +35,10 @@ type Error struct {
 
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+
+type Goto struct {
+	Mark string
+}
+
+func (gt *Goto) Type() ObjectType { return GOTO_OBJ }
+func (gt *Goto) Inspect() string  { return fmt.Sprintf("%s", gt.Mark) }
