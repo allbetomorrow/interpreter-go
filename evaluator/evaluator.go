@@ -13,7 +13,7 @@ var (
 )
 
 func Eval(node ast.Node, env *object.Environment) object.Object {
-	fmt.Printf("Evap %T\n", node)
+	// fmt.Printf("Evap %T\n", node)
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, env)
@@ -60,17 +60,20 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 
+	case *ast.BeginExpression:
+		return evalBeginExpression(node, env)
+
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	}
-	return nil
+	return NULL
 }
 
 func evalBlockStatement(
 	block *ast.BlockStatement,
 	env *object.Environment,
 ) object.Object {
-	var result object.Object
+	var result object.Object = NULL
 
 	for _, statement := range block.Statements {
 		result = Eval(statement, env)
@@ -99,6 +102,13 @@ func evalIdentifier(
 	// }
 
 	return newError("%s", "identifier not found: "+node.Value)
+}
+
+func evalBeginExpression(
+	be *ast.BeginExpression,
+	env *object.Environment,
+) object.Object {
+	return Eval(be.Block, env)
 }
 
 func evalIfExpression(

@@ -79,6 +79,28 @@ func TestIfElseExpressions(t *testing.T) {
 	}
 }
 
+func TestBeginExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"begin 5; end;", 5},
+		{"begin a: integer; a := 10; a; end;", 10},
+		{"begin end;", nil},
+		{"begin a: integer; end;", nil},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input    string
