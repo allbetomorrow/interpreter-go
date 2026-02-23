@@ -1,7 +1,7 @@
-begin
-x: integer;
-count: integer;
-begin
+a: integer;
+b: integer;
+read a, b;
+egin
 count := 10;
 if (count > 0) then 
 count := (count - 1);

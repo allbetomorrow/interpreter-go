@@ -71,6 +71,21 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.LoopExpression:
 		return evalLoopExpression(node, env)
+
+	case *ast.ReadExpression:
+		return evalReadExpression(node, env)
+	}
+	return NULL
+}
+
+func evalReadExpression(
+	node *ast.ReadExpression,
+	env *object.Environment,
+) object.Object {
+	for _, key := range node.Arguments {
+		var val int64
+		fmt.Scan(&val)
+		env.Set(key.TokenLiteral(), &object.Integer{Value: val})
 	}
 	return NULL
 }
@@ -94,7 +109,6 @@ func evalLoopExpression(
 
 	}
 
-	return result
 }
 
 func evalBlockStatement(

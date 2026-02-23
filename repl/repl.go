@@ -3,46 +3,45 @@ package repl
 import (
 	"bufio"
 	"fmt"
+	"interp/evaluator"
 	"interp/lexer"
+	"interp/object"
 	"interp/parser"
 	"io"
-	"log"
-	"os"
 )
 
+const PROMPT = ">> "
+
 func Start(in io.Reader, out io.Writer) {
-	file, err := os.OpenFile("output.txt", os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
+
 	for {
+		fmt.Printf(PROMPT)
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
 
 		line := scanner.Text()
-		fmt.Println(line)
 		l := lexer.New(line)
 		p := parser.New(l)
 
 		program := p.ParseProgram()
-
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			continue
 		}
 
-		file.WriteString(program.String())
-		file.WriteString("\n")
-
+		evaluated := evaluator.Eval(program, env)
+		if evaluated != evaluator.NULL {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
 func printParserErrors(out io.Writer, errors []string) {
-	io.WriteString(out, "Woops!\n")
 	io.WriteString(out, " parser errors:\n")
 	for _, msg := range errors {
 		io.WriteString(out, "\t"+msg+"\n")

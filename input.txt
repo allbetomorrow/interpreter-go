@@ -1,18 +1,3 @@
-begin
-  x: integer;
-  count: integer;
-
-  begin 
-    count := 10
-
-    if count > 0 then 
-      count := count - 1;
-    else
-      goto done;
-    end;
-    loop begin
-      goto fin
-    end;
-fin:
-  end;
-end;
+a: integer;
+b: integer;
+read a, b;
