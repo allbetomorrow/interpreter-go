@@ -359,6 +359,49 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestReadExpression(t *testing.T) {
+	input := `read x, y;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.ReadExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T",
+			stmt.Expression)
+	}
+
+	arg1, ok := exp.Arguments[0].(*ast.Identifier)
+	if !ok {
+		t.Fatalf("arg1 is not ast.Identifier. got=%T", exp.Arguments[0])
+	}
+	if !testIdentifier(t, arg1, "x") {
+		return
+	}
+
+	arg2, ok := exp.Arguments[1].(*ast.Identifier)
+	if !ok {
+		t.Fatalf("arg2 is not ast.Identifier. got=%T", exp.Arguments[0])
+	}
+	if !testIdentifier(t, arg2, "y") {
+		return
+	}
+
+}
+
 func TestIfExpression(t *testing.T) {
 	input := `if x < y then x := y; end;`
 

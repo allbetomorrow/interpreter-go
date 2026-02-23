@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"interp/token"
 	"strconv"
+	"strings"
 )
 
 type Node interface {
@@ -303,5 +304,28 @@ func (gs *GotoStatement) String() string {
 	out.WriteString(" ")
 	out.WriteString(gs.Name.String())
 	out.WriteString("\n")
+	return out.String()
+}
+
+type ReadExpression struct {
+	Token     token.Token
+	Arguments []Expression
+}
+
+func (re *ReadExpression) expressionNode()      {}
+func (re *ReadExpression) TokenLiteral() string { return re.Token.Literal }
+
+func (re *ReadExpression) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+	for _, a := range re.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString("read ")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(";")
+
 	return out.String()
 }

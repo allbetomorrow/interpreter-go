@@ -60,6 +60,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.KW_IF, p.parseIfExpression)
 	p.registerPrefix(token.KW_BEGIN, p.parseBeginExpression)
 	p.registerPrefix(token.KW_LOOP, p.parseLoopExpression)
+	p.registerPrefix(token.KW_READ, p.parseReadExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.LEX_PLUS, p.parseInfixExpression)
@@ -275,6 +276,29 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseReadExpression() ast.Expression {
+	exp := &ast.ReadExpression{Token: p.curToken}
+	exp.Arguments = p.parseExpressionList()
+	return exp
+}
+
+func (p *Parser) parseExpressionList() []ast.Expression {
+	list := []ast.Expression{}
+
+	if !p.expectPeek(token.LEX_IDENT) {
+		return nil
+	}
+
+	list = append(list, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.LEX_COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+	return list
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
