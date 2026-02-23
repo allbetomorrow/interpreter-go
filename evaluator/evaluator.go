@@ -65,10 +65,36 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+
 	case *ast.GotoStatement:
 		return &object.Goto{Mark: node.Token.Literal}
+
+	case *ast.LoopExpression:
+		return evalLoopExpression(node, env)
 	}
 	return NULL
+}
+
+func evalLoopExpression(
+	node *ast.LoopExpression,
+	env *object.Environment,
+) object.Object {
+	var result object.Object = NULL
+
+	for {
+		result = Eval(node.Body, env)
+
+		if result != nil {
+			rt := result.Type()
+			if rt == object.ERROR_OBJ || rt == object.GOTO_OBJ {
+				return result
+			}
+
+		}
+
+	}
+
+	return result
 }
 
 func evalBlockStatement(

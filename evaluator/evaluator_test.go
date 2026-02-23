@@ -117,6 +117,53 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
+func TestLoopExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]int64
+	}{
+		{
+			input: `a: integer;
+		loop begin
+			if a > 5 then
+				goto fs;
+			end;
+			a := a + 1;
+		end;
+		a := 22;
+		fs:`,
+			expected: map[string]int64{
+				"a": 6,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		env := object.NewEnvironment()
+		Eval(program, env)
+
+		for key, val := range tt.expected {
+			env_var, ok := env.Get(key)
+			if !ok {
+				t.Fatalf("variable %s not exist", key)
+			}
+
+			integer_obj, ok := env_var.(*object.Integer)
+			if !ok {
+				t.Fatalf("env_var is not integer go %T", env_var)
+			}
+
+			if integer_obj.Value != val {
+				t.Fatalf("value of %s is not %d, got %d", key, val, integer_obj.Value)
+			}
+		}
+
+	}
+}
+
 func TestGoto(t *testing.T) {
 	tests := []struct {
 		input    string
